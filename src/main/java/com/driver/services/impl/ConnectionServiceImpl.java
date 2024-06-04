@@ -86,39 +86,44 @@ public class ConnectionServiceImpl implements ConnectionService {
     @Override
     public User communicate(int senderId, int receiverId) throws Exception {
         // Find the sender and receiver Users using the userIds
-//        Optional<User> senderOptional = userRepository2.findById(senderId);
-//        Optional<User> receiverOptional = userRepository2.findById(receiverId);
-//        if(senderOptional.isPresent() && receiverOptional.isPresent()){
-//            User sender = senderOptional.get();
-//            User receiver = receiverOptional.get();
-//            // Determine the receiver's current country
-//            String receiverCountry = receiver.getConnected() ? receiver.getMaskedIp().split("\\.")[0] : String.valueOf(receiver.getOriginalCountry().getCountryName());
-//            // Check if the sender's original country matches the receiver's current country
-//            if(sender.getOriginalCountry().getCountryName().equals(receiverCountry)){
-//                return sender;
-//            }
-//            // If not, try to connect the sender to a ServiceProvider that provides the receiver's current country
-//            //List<ServiceProvider> serviceProviders = serviceProviderRepository2.findByCountryName(receiverCountry);
-//            List<ServiceProvider> serviceProviders = user.getServiceProviderList().stream()
-//                    .filter(sp -> sp.getCountryList().stream()
-//                            .anyMatch(c -> c.getCountryName().equalsIgnoreCase(receiverCountry)))
-//                    .sorted(Comparator.comparingInt(ServiceProvider::getId))
-//                    .collect(Collectors.toList());
-//            if(serviceProviders.isEmpty()){
-//                throw new Exception("Cannot establish communication");
-//            }
-//            // Connect the sender to the ServiceProvider with the smallest id
-//            ServiceProvider serviceProvider = serviceProviders.get(0);
-//            sender.setConnected(true);
-//            sender.setMaskedIp(receiverCountry + "." + serviceProvider.getId() + "." + sender.getId());
-//            // Save the updated sender
-//            userRepository2.save(sender);
-//            return sender;
-//        } else {
-//            // Handle the case where no User was found with the provided userId
-//            // You might want to throw an exception or return null
-//            return null;
-//        }
-        return null;
+        Optional<User> senderOptional = userRepository2.findById(senderId);
+        Optional<User> receiverOptional = userRepository2.findById(receiverId);
+        if(senderOptional.isPresent() && receiverOptional.isPresent())
+        {
+            User sender = senderOptional.get();
+            User receiver = receiverOptional.get();
+            // Determine the receiver's current country
+            String receiverCountry = receiver.getConnected() ? receiver.getMaskedIp().split("\\.")[0] : String.valueOf(receiver.getOriginalCountry().getCountryName());
+            // Check if the sender's original country matches the receiver's current country
+            if(sender.getOriginalCountry().getCountryName().equals(receiverCountry))
+            {
+                return sender;
+            }
+            // If not, try to connect the sender to a ServiceProvider that provides the receiver's current country
+            //List<ServiceProvider> serviceProviders = serviceProviderRepository2.findByCountryName(receiverCountry);
+            List<ServiceProvider> serviceProviders = sender.getServiceProviderList().stream()
+                    .filter(sp -> sp.getCountryList().stream()
+                            .anyMatch(c -> c.getCountryName().equals(receiverCountry)))
+                    .sorted(Comparator.comparingInt(ServiceProvider::getId))
+                    .collect(Collectors.toList());
+            if(serviceProviders.isEmpty())
+            {
+                throw new Exception("Cannot establish communication");
+            }
+            // Connect the sender to the ServiceProvider with the smallest id
+            ServiceProvider serviceProvider = serviceProviders.get(0);
+            sender.setConnected(true);
+            sender.setMaskedIp(receiverCountry + "." + serviceProvider.getId() + "." + sender.getId());
+            // Save the updated sender
+            userRepository2.save(sender);
+            return sender;
+        }
+         else
+         {
+            // Handle the case where no User was found with the provided userId
+            // You might want to throw an exception or return null
+            return null;
+         }
+       // return null;
     }
 }
