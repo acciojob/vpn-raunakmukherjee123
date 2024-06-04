@@ -1,5 +1,6 @@
 package com.driver.controllers;
 
+import com.driver.model.User;
 import com.driver.services.impl.ConnectionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ public class ConnectionController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
+
     @DeleteMapping("/disconnect")
     public ResponseEntity<Void> disconnect(@RequestParam int userId) throws Exception{
         //If the given user was not connected to a vpn, throw "Already disconnected" exception.
@@ -44,4 +47,6 @@ public class ConnectionController {
         User updatedSender = connectionService.communicate(senderId, receiverId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }
